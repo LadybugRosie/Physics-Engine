@@ -42,4 +42,10 @@ float vec2_magnitude(vec2_ptr v);
 // Normalize a vec2 vector and return a new vec2 pointer
 vec2_ptr vec2_normalize(vec2_ptr v);
 
+// Rotate a vec2 vector by an angle (in radians) and return a new vec2 pointer
+vec2_ptr vec2_rotate(vec2_ptr v, float angle);
+
+// Return vector v rotated 90 degrees counter-clockwise
+vec2_ptr vec2_perpendicular(vec2_ptr v);
+
 #endif // MATH_VEC2_H

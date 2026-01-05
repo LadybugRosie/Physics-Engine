@@ -45,6 +45,14 @@ vec2_ptr vec2_scale(vec2_ptr v, float scalar) {
     return vec2_create(v->x * scalar, v->y * scalar);
 }
 
+float vec2_dot(vec2_ptr v1, vec2_ptr v2) {
+    return v1->x * v2->x + v1->y * v2->y;
+}
+
+float vec2_magnitude(vec2_ptr v) {
+    return sqrtf(v->x * v->x + v->y * v->y);
+}
+
 vec2_ptr vec2_normalize(vec2_ptr v) {
     float mag = vec2_magnitude(v);
     if (mag == 0) {
@@ -54,6 +62,14 @@ vec2_ptr vec2_normalize(vec2_ptr v) {
     return vec2_scale(v, 1.0f / mag);
 }
 
-float vec2_dot(vec2_ptr v1, vec2_ptr v2) {
-    return v1->x * v2->x + v1->y * v2->y;
+vec2_ptr vec2_rotate(vec2_ptr v, float angle) {
+    float cos_angle = cosf(angle);
+    float sin_angle = sinf(angle);
+    float x_new = v->x * cos_angle - v->y * sin_angle;
+    float y_new = v->x * sin_angle + v->y * cos_angle;
+    return vec2_create(x_new, y_new);
+}
+
+vec2_ptr vec2_perpendicular(vec2_ptr v) {
+    return vec2_create(-v->y, v->x);
 }
