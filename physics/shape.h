@@ -31,4 +31,15 @@ typedef struct {
     };
 } Shape;
 
+// Constructor functions for different shapes
+Shape shape_create_circle(float radius);
+Shape shape_create_aabb(vec2 half_size);
+Shape shape_create_obb(vec2 half_size, float rotation);
+Shape shape_create_polygon(const vec2* vertices, size_t vertex_count);
+
+// Function to compute the area of a shape
+float shape_area(const Shape* shape);
+
+
+
 #endif

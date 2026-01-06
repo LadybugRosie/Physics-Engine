@@ -28,7 +28,7 @@ vec2 vec2_add(vec2 v1, vec2 v2);
 vec2 vec2_subtract(vec2 v1, vec2 v2);
 
 // Return the distance between two vec2 vectors
-vec2 vec2_distance(vec2 v1, vec2 v2);
+float vec2_distance(vec2 v1, vec2 v2);
 
 // Scale a vec2 vector by a scalar and return a new vec2 pointer
 vec2 vec2_scale(vec2 v, float scalar);
