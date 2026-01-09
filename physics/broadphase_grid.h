@@ -33,5 +33,8 @@ void grid_remove_body(body* b);
 // Computes potential collision pairs and stores them in out_pairs.
 int grid_compute(body_pair *out_pairs, int max_pairs);
 
+// Uninitialize the broadphase grid
+void grid_remove();
+
 
 #endif // PHYSICS_BROADPHASE_GRID_H

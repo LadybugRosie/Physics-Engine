@@ -13,7 +13,9 @@ static float cell_size;
 static int cell_count;
 static int num_cells_x;
 static int num_cells_y;
+
 static grid_cell* cells = NULL;
+static int (*object_x_cell_indices)[1024] = NULL;
 
 static vec2 world_min;
 static vec2 world_max;
@@ -33,7 +35,7 @@ void grid_init(float cell_size, vec2 world_min, vec2 world_max) {
 
     // Calculate grid dimensions and build cells
     int grid_width = (int)ceilf((world_max.x - world_min.x) / cell_size);
-    int grid_height = (int)ceilf((world_max.y - world_min.y) / cell_size);
+    int grid_height = (int)ceilf((world_max.y - world_min.y) / cell_size); // These cells shouldn't be problematic?
     cells = malloc(sizeof(grid_cell) * grid_width * grid_height);
     if (cells == NULL) {
         initialized = false;
@@ -43,9 +45,18 @@ void grid_init(float cell_size, vec2 world_min, vec2 world_max) {
     num_cells_x = grid_width;
     num_cells_y = grid_height;
     cell_count = grid_width * grid_height;
+
+    // Build a 2D array to track which bodies are in which cells (arr[cell #][index #])
+    object_x_cell_indices = malloc(1024 * sizeof(int) * cell_count);
+
+    if (object_x_cell_indices == NULL) {
+        initialized = false;
+        free(cells);
+        fprintf(stderr, "Failed to allocate memory for broadphase grid cell buckets");
+    }
 }
 
-void grid_clear() {
+inline void grid_clear() {
     if (bodies != NULL) {
         free(bodies);
         bodies = NULL;
@@ -53,6 +64,10 @@ void grid_clear() {
     if (cells != NULL) {
         free(cells);
         cells = NULL;
+    }
+    if (object_x_cell_indices != NULL) {
+        free(object_x_cell_indices);
+        object_x_cell_indices = NULL;
     }
     body_count = 0;
     body_capacity = 0;
@@ -95,4 +110,11 @@ int grid_compute(body_pair *out_pairs, int max_pairs) {
         }
     }
     return pair_count;
+}
+
+inline void grid_remove() {
+    grid_clear();
+    cell_size = 0;
+    cell_count = 0;
+    initialized = false;
 }
