@@ -15,7 +15,6 @@ static int num_cells_x;
 static int num_cells_y;
 
 static grid_cell* cells = NULL;
-static int (*object_x_cell_indices)[1024] = NULL;
 
 static vec2 world_min;
 static vec2 world_max;
@@ -46,10 +45,10 @@ void grid_init(float cell_size, vec2 world_min, vec2 world_max) {
     num_cells_y = grid_height;
     cell_count = grid_width * grid_height;
 
-    // Build a 2D array to track which bodies are in which cells (arr[cell #][index #])
-    object_x_cell_indices = malloc(1024 * sizeof(int) * cell_count);
+    // Build an array of grid cells
+    cells = malloc(cell_count * sizeof(grid_cell));
 
-    if (object_x_cell_indices == NULL) {
+    if (cells == NULL) {
         initialized = false;
         free(cells);
         fprintf(stderr, "Failed to allocate memory for broadphase grid cell buckets");
@@ -64,10 +63,6 @@ inline void grid_clear() {
     if (cells != NULL) {
         free(cells);
         cells = NULL;
-    }
-    if (object_x_cell_indices != NULL) {
-        free(object_x_cell_indices);
-        object_x_cell_indices = NULL;
     }
     body_count = 0;
     body_capacity = 0;
@@ -86,7 +81,35 @@ void grid_insert_body(body* b) {
     int cell_x = (int)((pos.x - world_min.x) / cell_size);
     int cell_y = (int)((pos.y - world_min.y) / cell_size);
     int cell_index = num_cells_x * cell_y + cell_x;
-    cells[cell_index].indices[cell_count++] = body_count - 1; // Fix the logic to initialize indices array properly.
+    grid_cell cell = cells[cell_index];
+
+    // Check if grid cell is initialized (and initialize if not)
+    if (cell.count == 0) {
+        cell.indices = malloc(4 * sizeof(int));
+
+        if (cell.indices == NULL) {
+            fprintf(stderr, "Error allocating memory for cell"); // Don't forget to free
+        }
+        cell.capacity = 4;
+    }
+
+    // Check that count is not at capacity
+    if (cell.count == cell.capacity) {
+        int * temp_ptr = NULL;
+        int * index_ptr = cell.indices;
+        int capacity = cell.capacity;
+
+        temp_ptr = realloc(index_ptr, 2 * capacity * sizeof(int)); // Change capacity to a size_t
+
+        if (temp_ptr == NULL) {
+            fprintf(stderr, "Reallocation for broadphase_grid failed"); // Figure out how to handle this
+        }
+        cell.indices = temp_ptr;
+    }
+
+    // Insert new index
+    cell.indices[cell.count] = body_count - 1;
+    cell.count++;
 }
 
 void grid_remove_body(body* b) {
