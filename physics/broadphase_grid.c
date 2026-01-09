@@ -113,14 +113,44 @@ void grid_insert_body(body* b) {
 }
 
 void grid_remove_body(body* b) {
+    // Remove the body from the body array
+    int body_index = -1;
     for (int i = 0; i < body_count; i++) {
         if (bodies[i] == b) {
             bodies[i] = bodies[body_count - 1];
             body_count--;
+            body_index = i;
+            break;
+        }
+    }
+
+    // Remove the body from the cell array
+    vec2 pos = b->position;
+    int cell_x = (int)((pos.x - world_min.x) / cell_size);
+    int cell_y = (int)((pos.y - world_min.y) / cell_size);
+    int cell_index = num_cells_x * cell_y + cell_x;
+    grid_cell cell = cells[cell_index];
+
+    for (int i = 0; i < cell.count; i++) {
+        if (cell.indices[i] == body_index) {
+            cell.indices[i] = cell.indices[cell.count - 1];
+            cell.count--;
             return;
         }
     }
+
+    // Update the cell index for the moved body
+    vec2 pos_replacer = bodies[body_count - 1]->position;
+    int cell_x_replacer = (int)((pos.x - world_min.x) / cell_size);
+    int cell_y_replacer = (int)((pos.y - world_min.y) / cell_size);
+    int cell_index_replacer = num_cells_x * cell_y + cell_x;
+    grid_cell cell_replacer = cells[cell_index_replacer];
+
+    // Must be the most recently inserted
+    cell_replacer.indices[cell_replacer.count - 1] = body_index;
 }
+
+// Do I need to modify this to account for balls moving between frames?
 
 int grid_compute(body_pair *out_pairs, int max_pairs) {
     int pair_count = 0;
